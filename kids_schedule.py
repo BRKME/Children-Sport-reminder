@@ -137,13 +137,16 @@ class KidsScheduleNotifier:
         # Capitalize day of week
         day_capitalized = day_of_week.capitalize()
         
+        # Get current date for Russian format
+        today = datetime.now()
+        day_month = today.strftime("%-d %B")  # "5 ноября"
+        
         # Get random tips
         marta_tip = random.choice(self.marta_tips)
         arkasha_tip = random.choice(self.arkasha_tips)
         
-        message = f"#Дети #Расписание {date_str} {day_capitalized} неделя {week_number}\n\n"
-        message += f"📅 <b>Расписание на {date_str}</b>\n"
-        message += f"🗓️ <b>{day_capitalized}</b>\n\n"
+        message = f"<b>#Дети #Расписание</b>\n"
+        message += f"📅 <b>Расписание на {day_capitalized} {day_month}, неделя {week_number}</b>\n\n"
         
         if activities:
             message += "👨‍👩‍👧‍👦 <b>Сегодня у детей:</b>\n\n"
@@ -160,6 +163,7 @@ class KidsScheduleNotifier:
         
         message += "\n\n💡 <b>Совет дня:</b>\n"
         message += f"👧 Для Марты: {marta_tip}\n"
+        message += f"\n"  # Пустая строка между советами
         message += f"👦 Для Аркаши: {arkasha_tip}\n\n"
         message += "💫 Хорошего дня!"
         
