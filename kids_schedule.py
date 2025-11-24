@@ -1,86 +1,11 @@
-#!/usr/bin/env python3
-"""
-Kids Schedule Notifier with Parenting Tips
-Sends daily schedule for Marta and Arkasha via Telegram
-"""
-
-import asyncio
-import aiohttp
-from datetime import datetime
-import locale
 import random
+import datetime
+import time
+import os
 
-# Устанавливаем русскую локаль для дней недели
-try:
-    locale.setlocale(locale.LC_TIME, 'ru_RU.UTF-8')
-except:
-    try:
-        locale.setlocale(locale.LC_TIME, 'Russian_Russia.1251')
-    except:
-        pass
-
-class KidsScheduleNotifier:
+class ChildrenDayReminder:
     def __init__(self):
-        # Telegram settings
-        self.telegram_token = "8442392037:AAEiM_b4QfdFLqbmmc1PXNvA99yxmFVLEp8"
-        self.chat_id = "350766421"
-        
-        # Schedule data
-        self.schedule = {
-            'понедельник': [
-                {'child': '👧 Марта', 'activity': '🇬🇧 Английский', 'time': '16:00-17:00'},
-                {'child': '👦 Аркаша', 'activity': '📐 Математика', 'time': '19:00-20:00'}
-            ],
-            'вторник': [
-                {'child': '👧 Марта', 'activity': '💃 Танцы', 'time': '17:30-19:00'},
-                {'child': '👦 Аркаша', 'activity': '⚽ Футбол', 'time': '17:00-18:00'}
-            ],
-            'среда': [
-                {'child': '👧 Марта', 'activity': '🤺 Фехтование', 'time': '15:00-16:30'},
-                {'child': '👧 Марта', 'activity': '🇬🇧 Английский', 'time': '17:00-18:00'}
-            ],
-            'четверг': [
-                {'child': '👧 Марта', 'activity': '💃 Танцы', 'time': '17:30-19:00'},
-                {'child': '👦 Аркаша', 'activity': '⚽ Футбол', 'time': '17:00-18:00'}
-            ],
-            'пятница': [
-                {'child': '👧 Марта', 'activity': '🤺 Фехтование', 'time': '15:00-16:30'},
-                {'child': '👦 Аркаша', 'activity': '📐 Математика', 'time': '19:00-20:00'}
-            ],
-            'суббота': [
-                {'child': '👧 Марта', 'activity': '🤺 Фехтование', 'time': '15:00-17:00'}
-            ],
-            'воскресенье': [
-                {'child': '👧 Марта', 'activity': '🤺 Фехтование', 'time': '12:00-14:00'}
-            ]
-        }
-        
-       # Marta tips (9 лет)
-self.marta_tips = [
-    "Покажи, что всегда за неё, слушай без лекций и разбирай ситуации вместе.",
-    "Ссоры с братом или сестрой. Провоцирует, дразнит, спорит «без причины». На самом деле: «Мне больно. Я не знаю, как об этом сказать». Агрессия часто — просто замаскированная тревога.",
-    "Не читай морали ('я же говорил') и не игнорируй успехи — отмечай даже мелочи.",
-    "Слушай без осуждения — это строит связь. Не закрывай темы тела и взросления.",
-    "В 9 лет девочка не «халявная», а просто мозг ещё учится самоконтролю и планированию. Задача взрослых — направлять, давать понятные правила и мотивировать через игру и похвалу, а не через обвинения.",
-    "Отказывается делать простое. Не хочет чистить зубы, одеваться, убирать. Внутреннее сообщение: «Я вымотан. У меня нет ресурса ни на что». Детям тоже нужна пауза — не только взрослым.",
-    "Дай зону ответственности (карманные деньги, выбор одежды), но не грузи взрослым.",
-    "Постоянно говорит 'мне скучно'. Жалуется, ходит за вами, раздражает специально. Истинный смысл: «Мне не хватает связи. Обними меня». Им скучно не от безделья, а от одиночества.",
-    "Хвали за процесс ('ты старалась'), а не только результат.",
-    "Интересуйся танцами, книгами, рисованием — спрашивай мнение, подкидывай ресурсы.",
-    "Помогай найти свой стиль учёбы, фокусируйся на любознательности, а не только оценках.",
-    "Следи за окружением подружек — для неё это как вселенная.",
-    "Поощряй спорт, движение, игры — мозг и тело связаны.",
-    "Шутите вместе, создавайте семейные мемы — это укрепляет отношения.",
-    "Научи решать конфликты со сверстницами — помогай видеть разные точки зрения.",
-    "Не сравнивай её с другими детьми — каждая уникальна в своём развитии.",
-    "Установи здоровый режим сна (9 часов в ночь) — усталость влияет на эмоции.",
-    "Говори о чувствах: 'это нормально злиться, грустить, бояться' — назови эмоции.",
-    "Ограничивай экраны перед сном — это поможет со сном и фокусом.",
-    "Создавай семейные традиции (семейный ужин, выходной день) — это якоря."
-]
-
-        
-        # Arkasha tips (13 лет)
+        # Подсказки для Аркаши (13 лет)
         self.arkasha_tips = [
             "Сохрани доверие в переходный период — будь героем, который понимает, а не судит.",
             "Гиперактивность перед сном. Бегает, шумит, дурачится, не идёт в кровать. На самом деле говорит: «Я переутомлён. Мне сложно успокоиться». Это не каприз, а перегрузка нервной системы",
@@ -108,148 +33,35 @@ self.marta_tips = [
             "Поддерживай его личное пространство и приватность — но знай основное.",
             "Учи критическому мышлению — не принимать информацию на веру, вопрошать 'почему'."
         ]
-    
-    async def send_telegram_message(self, message: str):
-        """Send message to Telegram"""
-        try:
-            url = f"https://api.telegram.org/bot{self.telegram_token}/sendMessage"
-            payload = {
-                'chat_id': self.chat_id,
-                'text': message,
-                'parse_mode': 'HTML',
-                'disable_web_page_preview': True
-            }
-            
-            async with aiohttp.ClientSession() as session:
-                async with session.post(url, json=payload) as response:
-                    if response.status == 200:
-                        print("✅ Telegram message sent successfully")
-                        return True
-                    else:
-                        error_text = await response.text()
-                        print(f"❌ Telegram API error: {error_text}")
-                        return False
-        except Exception as e:
-            print(f"❌ Failed to send Telegram message: {e}")
-            return False
-    
-    def get_today_schedule(self):
-        """Get today's schedule based on current day of week"""
-        today = datetime.now()
-        
-        # Format date and day of week in Russian
-        date_str = today.strftime("%d.%m.%Y")
-        week_number = today.isocalendar()[1]
-        
-        try:
-            day_of_week = today.strftime("%A").lower()
-            day_of_week_ru = {
-                'monday': 'понедельник',
-                'tuesday': 'вторник',
-                'wednesday': 'среда', 
-                'thursday': 'четверг',
-                'friday': 'пятница',
-                'saturday': 'суббота',
-                'sunday': 'воскресенье'
-            }.get(day_of_week, day_of_week)
-        except:
-            # Fallback if locale doesn't work
-            days = ['понедельник', 'вторник', 'среда', 'четверг', 'пятница', 'суббота', 'воскресенье']
-            day_of_week_ru = days[today.weekday()]
-        
-        today_activities = self.schedule.get(day_of_week_ru, [])
-        
-        return date_str, day_of_week_ru, today_activities, week_number
-    
-    def format_schedule_message(self, date_str: str, day_of_week: str, activities: list, week_number: int, spoiler_mode: bool = True):
-        """Format the schedule message for Telegram"""
-        # Capitalize day of week
-        day_capitalized = day_of_week.capitalize()
-        
-        # Get current date for Russian format
-        today = datetime.now()
-        day_month = today.strftime("%-d %B")  # "5 ноября"
-        
-        # Get random tips
-        marta_tip = random.choice(self.marta_tips)
-        arkasha_tip = random.choice(self.arkasha_tips)
-        
-        message = f"<b>#Дети #Расписание</b>\n"
-        message += f"📅 <b>{day_capitalized} {day_month}, неделя {week_number}</b>\n\n"
-        
-        if activities:
-            message += "👨‍👩‍👧‍👦 <b>Сегодня у детей:</b>\n\n"
-            
-            for i, activity in enumerate(activities, 1):
-                message += f"{i}. {activity['child']}\n"
-                message += f"   {activity['activity']}\n"
-                message += f"   🕐 {activity['time']}\n"
-                
-                if i < len(activities):
-                    message += "\n"
-        else:
-            message += "🎉 <b>Сегодня выходной! Занятий нет.</b>\n"
-        
-        message += "\n\n" + "="*40 + "\n"
-        message += "💡 <b>Совет дня:</b>\n\n"
-        
-        if spoiler_mode:
-            # Spoiler mode - советы скрыты под спойлерами
-            message += f"👧 <b>Для Марты (9 лет):</b>\n"
-            message += f"<tg-spoiler>{marta_tip}</tg-spoiler>\n\n"
-            
-            message += f"👦 <b>Для Аркаши (13 лет):</b>\n"
-            message += f"<tg-spoiler>{arkasha_tip}</tg-spoiler>\n\n"
-            
-            message += "🔍 <i>Нажмите на текст, чтобы увидеть советы</i>\n\n"
-        else:
-            # Normal mode - советы видны сразу
-            message += f"👧 <b>Для Марты (9 лет):</b>\n{marta_tip}\n\n"
-            message += f"👦 <b>Для Аркаши (13 лет):</b>\n{arkasha_tip}\n\n"
-        
-        message += "💫 Хорошего дня!"
-        
-        return message
-    
-    async def send_daily_schedule(self, spoiler_mode: bool = True):
-        """Send today's schedule to Telegram"""
-        print("🕐 Preparing daily schedule...")
-        
-        date_str, day_of_week, activities, week_number = self.get_today_schedule()
-        
-        print(f"📅 Today: {date_str}, {day_of_week}, week {week_number}")
-        print(f"📋 Activities: {len(activities)}")
-        print(f"🎯 Spoiler mode: {'ON' if spoiler_mode else 'OFF'}")
-        
-        message = self.format_schedule_message(date_str, day_of_week, activities, week_number, spoiler_mode)
-        
-        # Print to console for debugging (без спойлеров)
-        print("\n" + "="*50)
-        debug_message = message.replace('<b>', '').replace('</b>', '').replace('<tg-spoiler>', '').replace('</tg-spoiler>', '').replace('<i>', '').replace('</i>', '')
-        print(debug_message)
-        print("="*50)
-        
-        # Send to Telegram
-        print("\n📱 Sending to Telegram...")
-        success = await self.send_telegram_message(message)
-        
-        if success:
-            print("✅ Daily schedule sent successfully!")
-        else:
-            print("❌ Failed to send daily schedule")
-        
-        return success
 
-async def main():
-    """Main execution function"""
-    try:
-        notifier = KidsScheduleNotifier()
-        
-        # Можно переключить spoiler_mode на False, чтобы отключить спойлеры
-        await notifier.send_daily_schedule(spoiler_mode=True)
-        
-    except Exception as e:
-        print(f"❌ Critical error: {e}")
+    def get_daily_tip(self):
+        today = datetime.date.today()
+        random.seed(today)  # один и тот же совет каждый день
+        tip = random.choice(self.arkasha_tips)
+        return tip
 
+    def print_tip(self):
+        tip = self.get_daily_tip()
+        print("=" * 60)
+        print("СОВЕТ НА СЕГОДНЯ ДЛЯ АРКАШИ (13 лет)".center(60))
+        print("=" * 60)
+        print()
+        print(tip)
+        print()
+        print("-" * 60)
+        print(f"Дата: {datetime.date.today().strftime('%d.%m.%Y')}")
+
+# Основной запуск
 if __name__ == "__main__":
-    asyncio.run(main())
+    reminder = ChildrenDayReminder()
+    
+    # Очищаем экран (работает в Replit и большинстве терминалов)
+    os.system('clear' if os.name == 'posix' else 'cls')
+    
+    reminder.print_tip()
+    
+    # Если хочешь, чтобы совет обновлялся каждые 6 часов — раскомментируй ниже
+    # while True:
+    #     os.system('clear' if os.name == 'posix' else 'cls')
+    #     reminder.print_tip()
+    #     time.sleep(6 * 60 * 60)  # 6 часов
