@@ -2,6 +2,7 @@ import random
 import datetime
 import time
 import os
+import requests
 
 class ChildrenDayReminder:
     def __init__(self):
@@ -33,6 +34,10 @@ class ChildrenDayReminder:
             "Поддерживай его личное пространство и приватность — но знай основное.",
             "Учи критическому мышлению — не принимать информацию на веру, вопрошать 'почему'."
         ]
+        
+        # Telegram settings
+        self.telegram_token = "8442392037:AAEiM_b4QfdFLqbmmc1PXNvA99yxmFVLEp8"
+        self.chat_id = "350766421"
 
     def get_daily_tip(self):
         today = datetime.date.today()
@@ -40,8 +45,32 @@ class ChildrenDayReminder:
         tip = random.choice(self.arkasha_tips)
         return tip
 
+    def send_telegram_message(self, message):
+        """Отправляет сообщение в Telegram"""
+        url = f"https://api.telegram.org/bot{self.telegram_token}/sendMessage"
+        payload = {
+            "chat_id": self.chat_id,
+            "text": message,
+            "parse_mode": "HTML"
+        }
+        
+        try:
+            response = requests.post(url, json=payload)
+            if response.status_code == 200:
+                print("✅ Сообщение успешно отправлено в Telegram!")
+                return True
+            else:
+                print(f"❌ Ошибка отправки в Telegram: {response.status_code}")
+                print(f"Ответ: {response.text}")
+                return False
+        except Exception as e:
+            print(f"❌ Ошибка подключения к Telegram: {e}")
+            return False
+
     def print_tip(self):
         tip = self.get_daily_tip()
+        
+        # Формируем красивый вывод в консоль
         print("=" * 60)
         print("СОВЕТ НА СЕГОДНЯ ДЛЯ АРКАШИ (13 лет)".center(60))
         print("=" * 60)
@@ -50,6 +79,19 @@ class ChildrenDayReminder:
         print()
         print("-" * 60)
         print(f"Дата: {datetime.date.today().strftime('%d.%m.%Y')}")
+        
+        # Формируем сообщение для Telegram
+        telegram_message = f"""
+🎯 <b>СОВЕТ НА СЕГОДНЯ ДЛЯ АРКАШИ (13 лет)</b>
+📅 {datetime.date.today().strftime('%d.%m.%Y')}
+
+{tip}
+
+💡 <i>Помни: каждый день - новая возможность стать лучше!</i>
+        """
+        
+        # Отправляем в Telegram
+        self.send_telegram_message(telegram_message)
 
 # Основной запуск
 if __name__ == "__main__":
