@@ -2,7 +2,9 @@ import random
 import datetime
 import time
 import os
-import requests
+import urllib.request
+import urllib.parse
+import json
 
 class ChildrenDayReminder:
     def __init__(self):
@@ -46,23 +48,36 @@ class ChildrenDayReminder:
         return tip
 
     def send_telegram_message(self, message):
-        """Отправляет сообщение в Telegram"""
+        """Отправляет сообщение в Telegram используя urllib"""
         url = f"https://api.telegram.org/bot{self.telegram_token}/sendMessage"
-        payload = {
+        
+        data = {
             "chat_id": self.chat_id,
             "text": message,
             "parse_mode": "HTML"
         }
         
         try:
-            response = requests.post(url, json=payload)
-            if response.status_code == 200:
-                print("✅ Сообщение успешно отправлено в Telegram!")
-                return True
-            else:
-                print(f"❌ Ошибка отправки в Telegram: {response.status_code}")
-                print(f"Ответ: {response.text}")
-                return False
+            # Кодируем данные в JSON
+            data_bytes = json.dumps(data).encode('utf-8')
+            
+            # Создаем запрос
+            request = urllib.request.Request(
+                url,
+                data=data_bytes,
+                headers={'Content-Type': 'application/json'}
+            )
+            
+            # Отправляем запрос
+            with urllib.request.urlopen(request) as response:
+                result = json.loads(response.read().decode('utf-8'))
+                if result.get('ok'):
+                    print("✅ Сообщение успешно отправлено в Telegram!")
+                    return True
+                else:
+                    print(f"❌ Ошибка отправки в Telegram: {result}")
+                    return False
+                    
         except Exception as e:
             print(f"❌ Ошибка подключения к Telegram: {e}")
             return False
@@ -101,9 +116,3 @@ if __name__ == "__main__":
     os.system('clear' if os.name == 'posix' else 'cls')
     
     reminder.print_tip()
-    
-    # Если хочешь, чтобы совет обновлялся каждые 6 часов — раскомментируй ниже
-    # while True:
-    #     os.system('clear' if os.name == 'posix' else 'cls')
-    #     reminder.print_tip()
-    #     time.sleep(6 * 60 * 60)  # 6 часов
