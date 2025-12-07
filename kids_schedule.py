@@ -125,17 +125,28 @@ class KidsScheduleNotifier:
                 'disable_web_page_preview': True
             }
             
+            # Детальное логирование для диагностики
+            print(f"🔍 Attempting to send message to chat_id: {self.chat_id}")
+            print(f"🔍 Bot token: {self.telegram_token[:10]}...{self.telegram_token[-10:]}")
+            print(f"🔍 Message length: {len(message)} characters")
+            
             async with aiohttp.ClientSession() as session:
                 async with session.post(url, json=payload) as response:
+                    response_text = await response.text()
+                    
+                    print(f"🔍 Response status: {response.status}")
+                    print(f"🔍 Response body: {response_text}")
+                    
                     if response.status == 200:
                         print("✅ Telegram message sent successfully")
                         return True
                     else:
-                        error_text = await response.text()
-                        print(f"❌ Telegram API error: {error_text}")
+                        print(f"❌ Telegram API error (status {response.status}): {response_text}")
                         return False
         except Exception as e:
             print(f"❌ Failed to send Telegram message: {e}")
+            import traceback
+            print(traceback.format_exc())
             return False
     
     def get_today_schedule(self):
