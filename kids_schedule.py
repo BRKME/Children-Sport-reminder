@@ -44,6 +44,7 @@ class KidsScheduleNotifier:
             ],
             'среда': [
                 {'child': '👧 Марта', 'activity': '🤺 Фехтование', 'time': '15:00-16:30'},
+                {'child': '👦 Аркаша', 'activity': '🤺 Фехтование', 'time': '16:00-18:00'},
                 {'child': '👧 Марта', 'activity': '🇬🇧 Английский', 'time': '17:00-18:00'}
             ],
             'четверг': [
@@ -52,13 +53,15 @@ class KidsScheduleNotifier:
             ],
             'пятница': [
                 {'child': '👧 Марта', 'activity': '🤺 Фехтование', 'time': '15:00-16:30'},
+                {'child': '👦 Аркаша', 'activity': '🤺 Фехтование', 'time': '16:00-18:00'},
                 {'child': '👦 Аркаша', 'activity': '📐 Математика', 'time': '19:00-20:00'}
             ],
             'суббота': [
                 {'child': '👧 Марта', 'activity': '🤺 Фехтование', 'time': '15:00-17:00'}
             ],
             'воскресенье': [
-                {'child': '👧 Марта', 'activity': '🤺 Фехтование', 'time': '12:00-14:00'}
+                {'child': '👧 Марта', 'activity': '🤺 Фехтование', 'time': '12:00-14:00'},
+                {'child': '👦 Аркаша', 'activity': '🤺 Фехтование', 'time': '14:00-16:00'}
             ]
         }
         
@@ -190,40 +193,44 @@ class KidsScheduleNotifier:
         marta_tip = random.choice(self.marta_tips)
         arkasha_tip = random.choice(self.arkasha_tips)
         
-        message = f"<b>#Дети #Расписание</b>\n"
-        message += f"📅 <b>{day_capitalized} {day_month}, неделя {week_number}</b>\n\n"
+        # 🎨 СОВРЕМЕННЫЙ ДИЗАЙН
+        message = f"<b>📅 {day_capitalized} • {day_month}</b>\n"
+        message += f"<i>Неделя {week_number}</i>\n\n"
         
         if activities:
-            message += "👨‍👩‍👧‍👦 <b>Сегодня у детей:</b>\n\n"
+            message += "<b>👨‍👩‍👧‍👦 Расписание на сегодня</b>\n\n"
             
             for i, activity in enumerate(activities, 1):
-                message += f"{i}. {activity['child']}\n"
-                message += f"   {activity['activity']}\n"
-                message += f"   🕐 {activity['time']}\n"
+                # Убираем эмодзи из child, используем только имя
+                child_name = activity['child'].replace('👧 ', '').replace('👦 ', '')
                 
+                message += f"<b>{activity['child']}</b>\n"
+                message += f"{activity['activity']}\n"
+                message += f"🕐 <code>{activity['time']}</code>\n"
+                
+                # Добавляем пробел между записями, но не после последней
                 if i < len(activities):
                     message += "\n"
         else:
-            message += "🎉 <b>Сегодня выходной! Занятий нет.</b>\n"
+            message += "🎉 <b>Выходной день!</b>\n"
+            message += "<i>Сегодня занятий нет</i>\n"
         
-        message += "\n\n" + "="*40 + "\n"
-        message += "💡 <b>Совет дня:</b>\n\n"
+        message += "\n━━━━━━━━━━━━━━━\n\n"
+        message += "💡 <b>Совет дня</b>\n\n"
         
         if spoiler_mode:
-            # Spoiler mode - советы скрыты под спойлерами
-            message += f"👧 <b>Для Марты (9 лет):</b>\n"
+            # Spoiler mode с эмодзи-индикаторами
+            message += f"<b>👧 Марта</b> • 9 лет\n"
             message += f"<tg-spoiler>{marta_tip}</tg-spoiler>\n\n"
             
-            message += f"👦 <b>Для Аркаши (13 лет):</b>\n"
-            message += f"<tg-spoiler>{arkasha_tip}</tg-spoiler>\n\n"
-            
-            message += "🔍 <i>Нажмите на текст, чтобы увидеть советы</i>\n\n"
+            message += f"<b>👦 Аркаша</b> • 13 лет\n"
+            message += f"<tg-spoiler>{arkasha_tip}</tg-spoiler>\n"
         else:
-            # Normal mode - советы видны сразу
-            message += f"👧 <b>Для Марты (9 лет):</b>\n{marta_tip}\n\n"
-            message += f"👦 <b>Для Аркаши (13 лет):</b>\n{arkasha_tip}\n\n"
+            # Normal mode
+            message += f"<b>👧 Марта</b> • 9 лет\n{marta_tip}\n\n"
+            message += f"<b>👦 Аркаша</b> • 13 лет\n{arkasha_tip}\n\n"
         
-        message += "💫 Хорошего дня!"
+        message += "\n✨ <i>Хорошего дня!</i>"
         
         return message
     
