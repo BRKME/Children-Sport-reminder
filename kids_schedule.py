@@ -9,6 +9,7 @@ import aiohttp
 from datetime import datetime
 import locale
 import random
+import os
 
 # Устанавливаем русскую локаль для дней недели
 try:
@@ -21,9 +22,15 @@ except:
 
 class KidsScheduleNotifier:
     def __init__(self):
-        # Telegram settings
-        self.telegram_token = "8442392037:AAEiM_b4QfdFLqbmmc1PXNvA99yxmFVLEp8"
-        self.chat_id = "350766421"
+        # Telegram settings - используем переменные окружения
+        self.telegram_token = os.getenv("TELEGRAM_TOKEN")
+        self.chat_id = os.getenv("TELEGRAM_CHAT_ID")
+        
+        # Проверка наличия обязательных переменных
+        if not self.telegram_token:
+            raise ValueError("❌ TELEGRAM_TOKEN не установлен в переменных окружения!")
+        if not self.chat_id:
+            raise ValueError("❌ TELEGRAM_CHAT_ID не установлен в переменных окружения!")
         
         # Schedule data
         self.schedule = {
