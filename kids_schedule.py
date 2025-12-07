@@ -193,7 +193,7 @@ class KidsScheduleNotifier:
         marta_tip = random.choice(self.marta_tips)
         arkasha_tip = random.choice(self.arkasha_tips)
         
-        # 🎨 СОВРЕМЕННЫЙ ДИЗАЙН
+        # 🎨 СОВРЕМЕННЫЙ МИНИМАЛИСТИЧНЫЙ ДИЗАЙН
         message = f"<b>📅 {day_capitalized} • {day_month}</b>\n"
         message += f"<i>Неделя {week_number}</i>\n\n"
         
@@ -201,9 +201,6 @@ class KidsScheduleNotifier:
             message += "<b>👨‍👩‍👧‍👦 Расписание на сегодня</b>\n\n"
             
             for i, activity in enumerate(activities, 1):
-                # Убираем эмодзи из child, используем только имя
-                child_name = activity['child'].replace('👧 ', '').replace('👦 ', '')
-                
                 message += f"<b>{activity['child']}</b>\n"
                 message += f"{activity['activity']}\n"
                 message += f"🕐 <code>{activity['time']}</code>\n"
@@ -215,8 +212,7 @@ class KidsScheduleNotifier:
             message += "🎉 <b>Выходной день!</b>\n"
             message += "<i>Сегодня занятий нет</i>\n"
         
-        message += "\n━━━━━━━━━━━━━━━\n\n"
-        message += "💡 <b>Совет дня</b>\n\n"
+        message += "\n\n💡 <b>Совет дня</b>\n\n"
         
         if spoiler_mode:
             # Spoiler mode с эмодзи-индикаторами
