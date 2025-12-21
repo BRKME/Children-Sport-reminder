@@ -1,8 +1,8 @@
 name: Daily Kids Schedule
 on:
   schedule:
-    # Запускать каждый день в 9:00 утра по Москве (04:00 UTC)
-    - cron: '0 9 * * *'
+    # Запускать каждый день в 14:00 утра по Москве (04:00 UTC)
+    - cron: '0 11 * * *'
   workflow_dispatch:  # Позволяет запускать вручную
 jobs:
   notify:
